@@ -82,12 +82,17 @@ subparsers:
                 options:
                     storage-backend:
                         choices: [ceph]
+                        help: |
+                            Backend for Cinder's storage
+                            (default: ues Cinder's default storage)
                     storage-type:
                         choices: [internal, external]
                         help: |
-                            Use internal/external storage. Only applicable for when "storage-backend" is used
+                            Use internal/external storage. Only applicable for when "storage-backend" is used.
+                            (default: internal)
                     storage-template:
                         help: |
-                            Storage configuration template file. Search first in templates dir.
+                            Storage configuration template file. Only applicable for when "storage-backend" is used.
+                            Search first in templates dir.
                             (default: match storage type)
 
