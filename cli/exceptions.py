@@ -57,3 +57,7 @@ class IRPlaceholderException(IRException):
 
 class IRNotImplemented(IRException):
     pass
+
+
+class IRInputError(IRException):
+    pass

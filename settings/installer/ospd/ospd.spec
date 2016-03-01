@@ -80,11 +80,12 @@ subparsers:
                         help: URL to images servers
               - title: Storage Options
                 options:
+                    storage-backend:
+                        choices: [ceph]
                     storage-type:
                         choices: [internal, external]
-                        default: internal
                         help: |
-                            Use internal/external storage
+                            Use internal/external storage. Only applicable for when "storage-backend" is used
                     storage-template:
                         help: |
                             Storage configuration template file. Search first in templates dir.

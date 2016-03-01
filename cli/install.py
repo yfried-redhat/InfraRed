@@ -1,6 +1,8 @@
 #!/usr/bin/env python
-
+import argparse
 import logging
+
+import clg
 import os
 
 import yaml
@@ -83,13 +85,15 @@ def main():
                                                "network", "templates"))))
     settings_dict["installer"]["overcloud"]["network"]["template"] = \
         net_template
-    storage_template = yaml.load(
-        open(set_network_template(
-            settings_dict["installer"]["overcloud"]["storage"]["template"],
-            os.path.join(get_settings_dir(args),
-                         "storage", "templates"))))
-    settings_dict["installer"]["overcloud"]["storage"]["template"] = \
-        storage_template
+    # default storage doesn't have template
+    if "storage" in settings_dict["installer"]["overcloud"]:
+        storage_template = yaml.load(
+            open(set_network_template(
+                settings_dict["installer"]["overcloud"]["storage"]["template"],
+                os.path.join(get_settings_dir(args),
+                             "storage", "templates"))))
+        settings_dict["installer"]["overcloud"]["storage"]["template"] = \
+            storage_template
 
     LOG.debug("All settings files to be loaded:\n%s" % settings_files)
     cli.yamls.Lookup.settings = utils.generate_settings(settings_files,
@@ -196,13 +200,26 @@ def set_image(args):
 
 def set_storage(args):
     """Set storage type and default template. """
+    backend = args["storage-backend"]
+    stype = args["storage-type"]
+    template = args["storage-template"]
 
-    return {"installer": {
-        "overcloud": {
-            "storage": {"type": args["storage-type"],
-                        "template":
-                            args["storage-template"] or
-                            args["storage-type"] + ".yml"}}}}
+    if not backend:
+        if template or stype:
+            raise exceptions.IRInputError(
+                "usage: 'storage-type' and 'storage-template'"
+                " require 'storage-backend'")
+        else:
+            return {"installer": {"overcloud": {}}}
+
+    # default storage type is 'internal', but only when backend is defined
+    stype = stype or "internal"
+
+    storage = {"backend": backend,
+               "type": stype or "internal",
+               "template": template or
+                           stype + ".yml"}
+    return {"installer": {"overcloud": {"storage": storage}}}
 
 
 if __name__ == '__main__':

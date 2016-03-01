@@ -134,14 +134,24 @@ def test_set_image_build():
 
 @pytest.mark.parametrize('args, output', [
     ("",
-     {"type": "internal",
-      "template": "internal.yml"}),
-    ("--storage-type external",
-     {"type": "external",
-      "template": "external.yml"}),
-    ("--storage-type external --storage-template fake_tmp",
-     {"type": "external",
-      "template": "fake_tmp"})
+     {}),
+    ("--storage-backend ceph",
+     {"storage": {"backend": "ceph",
+                  "type": "internal",
+                  "template": "internal.yml"}}),
+    ("--storage-backend ceph --storage-type internal",
+     {"storage": {"backend": "ceph",
+                  "type": "internal",
+                  "template": "internal.yml"}}),
+    ("--storage-backend ceph --storage-type external",
+     {"storage": {"backend": "ceph",
+                  "type": "external",
+                  "template": "external.yml"}}),
+    ("--storage-backend ceph --storage-type external "
+     "--storage-template fake_tmp",
+     {"storage": {"backend": "ceph",
+                  "type": "external",
+                  "template": "fake_tmp"}})
 ])
 def test_set_storage(args, output):
     from cli import install
@@ -150,4 +160,20 @@ def test_set_storage(args, output):
     args = args.strip(" ")
     args = install.get_args(args=args.split(" "))
     storage = install.set_storage(args)
-    assert storage["installer"]["overcloud"]["storage"] == output
+    assert storage["installer"]["overcloud"] == output
+
+
+@pytest.mark.parametrize('args', [
+    "--storage-type external --storage-template fake_tmp",
+    "--storage-type external",
+    "--storage-template fake_tmp",
+])
+def test_set_storage_negative(args):
+    from cli import exceptions
+    from cli import install
+
+    args = "ospd --rpm path_to_rpm --version 7 " + args
+    args = args.strip(" ")
+    args = install.get_args(args=args.split(" "))
+    with pytest.raises(exceptions.IRInputError):
+        install.set_storage(args)
