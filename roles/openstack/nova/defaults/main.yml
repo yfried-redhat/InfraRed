@@ -1,0 +1,11 @@
+# Instances defaults
+
+config_drive: no
+instance_image: centos-minimal
+instance_name: instance1
+wait: yes
+
+# Flavor defaults
+
+flavor_id: 4
+flavor_name: ir-flavor

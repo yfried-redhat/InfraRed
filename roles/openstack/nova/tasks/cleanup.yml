@@ -1,0 +1,24 @@
+---
+# This file is used to cleanup OpenStack nova resources
+
+- name: Release floating IPs
+  os_floating_ip:
+      server: {{ item.value.server | default(instance_name) }}
+      state: absent
+  with_dict: {{ provisioner.floating_ips }}
+  when: provisioner.floating_ips is defined
+
+- name: Cleanup instances
+  os_server:
+      image: {{ item.value.image | default(instance_image) }}
+      name: {{ item.value.name | default(instance_name) }}
+      state: absent
+  with_dict: {{ provisioner.instances }}
+  when: provisioner.instances is defined
+
+- name: Cleanup flavors
+  os_nova_flavor:
+      name: {{ item.value.nane | default(flavor_name) }}
+      state: absent
+  with_dict: {{ provisioner.flavors }}
+  when: provisioner.flavors is defined  

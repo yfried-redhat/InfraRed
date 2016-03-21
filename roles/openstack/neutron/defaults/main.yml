@@ -1,0 +1,17 @@
+# Network defaults
+
+external_network: 180
+timeout_network: 180
+shared_network: False
+
+# Subnet defaults
+
+enable_dhcp: True
+dns_servers:
+    - 208.67.222.222
+    - 8.8.8.8
+
+# Router defaults
+
+router_name: router1
+router_network: public

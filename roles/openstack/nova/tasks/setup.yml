@@ -1,0 +1,42 @@
+---
+# This file is used to create OpenStack nova resources
+
+- name: Create flavors
+  os_nova_flavor:
+      name: {{ item.value.nane | default(flavor_name) }}
+      ram: {{ item.value.ram | default(omit) }}
+      disk: {{ item.value.disk | default(omit) }}
+      vcpus: {{ item.value.vcpus | default(omit) }}
+      state: present
+  register: flavors
+  with_dict: {{ provisioner.flavors }}
+  when: provisioner.flavors is defined  
+
+- name: Create instances
+  os_server:
+      auto_ip: {{ item.value.auto_ip | default(auto_ip) }}
+      config_drive: {{ item.value.config_drive | default(config_drive) }}
+      flavor: {{ item.value.flavor | default(flavor_id) }}
+      image: {{ item.value.image | default(instance_image) }}
+      name: {{ item.value.name | default(instance_name) }}
+      nics: {{ item.value.nics | default(omit) }}
+      network: {{ item.value.network | default(network) }}
+      key: {{ item.value.key | default(omit) }}
+      key_name: {{ item.value.key_name | default(omit) }}
+      state: present
+      wait: {{ item.value.wait | default(wait) }}
+  register: instances
+  with_dict: {{ provisioner.instances }}
+  when: provisioner.instances is defined
+
+- name: Create floating IPs
+  os_floating_ip:
+      fixed_address: {{ item.value.fixed_address | default(omit) }}
+      network: {{ item.value.network | default(omit) }}
+      server: {{ item.value.server | default(instance_name) }}
+      reuse: {{ item.value.resuse | default(omit) }}
+      state: present
+  register: floating_ips
+  with_dict: {{ provisioner.floating_ips }}
+  when: provisioner.floating_ips is defined
+

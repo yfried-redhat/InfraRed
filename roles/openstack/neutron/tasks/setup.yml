@@ -1,0 +1,38 @@
+---
+# This file is used to create OpenStack neutron resources
+
+- name: Create networks
+  os_network:
+      external: {{ item.value.external | default(external_network) }}
+      name {{ item.value.name }}
+      state: present
+      shared: {{ item.value.shared | default(shared_network) }}
+      timeout: {{ item.value.timeout | default(timeout_network) }}
+  register: networks
+  with_dict: {{ provisioner.networks }}
+  when: provisioner.networks is defined
+
+- name: Create subnets
+  os_subnet:
+      allocation_pool_start: {{ item.value.allocation_pool_start }}
+      allocation_pool_end: {{ item.value.allocation_pool_end }}
+      cidr: {{ item.value.cidr | default(omit) }}
+      dns_nameservers: {{ item.value.dns_servers | default(dns_servers) }}
+      enable_dhcp: {{ item.value.enable_dhcp | default(enable_dhcp) }}
+      name: {{ item.value.name }}
+      network_name: {{ item.value.network_name }}
+      state: present
+  register: subnets
+  with_dict: {{ provisioner.subnets }}
+  when: provisioner.subnets is defined
+
+- name: Create routers
+  os_router:
+      external_fixed_ips: {{ item.value.external_fixed_ips | default(omit) }}
+      interfaces: {{ item.value.attach_subnets | default(omit) }}
+      name: {{ item.value.name | default(router_name) }}
+      network: {{ item.value.network | default(router_network) }}
+      state: present
+  register: routers
+  with_dict: {{ provisioner.routers }}
+  when: provisioner.routers is defined
