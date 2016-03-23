@@ -6,17 +6,17 @@ subparsers:
             - title: image
               options:
                   image-name:
-                      type: str
+                      type: Value
                       help: An image on OpenStack cloud to provision the instance with
                       required: yes
             - title: topology
               options:
                   network:
-                      type: str
+                      type: YamlFile
                       help: Network
                       default: default.yml
                   topology:
-                      type: str
+                      type: Topology
                       help: Provision topology.
                       default: "1_controller"
             - title: common
