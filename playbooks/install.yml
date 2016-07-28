@@ -34,6 +34,35 @@
       - name: Iptables - Save default rules
         shell: /sbin/iptables-save >/etc/sysconfig/iptables
 
+- name: Dump overcloud VMs xmls
+  hosts: virthost
+  gather_facts: no
+  tasks:
+    - name: get the list of VMs
+      virt:
+        command: list_vms
+      register: vms
+
+    - name: DEBUG - get XML before install
+      virt:
+          name: "{{ item }}"
+          command: get_xml
+      register: xmls
+      with_items: "{{ vms.list_vms }}"
+
+    - name: Ensures {{ inventory_dir }}/new_vms dir exists
+      file:
+        path: "{{ inventory_dir }}/new_vms"
+        state: directory
+      delegate_to: localhost
+
+    - name: DEBUG - dump XMLs to file
+      copy:
+            content: "{{ item.get_xml }}"
+            dest: "{{ inventory_dir }}/new_vms/{{ item.item }}.xml"
+      delegate_to: localhost
+      with_items: "{{ xmls.results }}"
+
 - name: Dump all facts before the installation begins
   hosts: openstack_nodes
   gather_facts: no
@@ -45,9 +74,17 @@
 
       - name: Writing facts into files
         copy:
-            content: "{{ initial_facts.ansible_facts }}"
-            dest: "{{ inventory_dir }}/{{ inventory_hostname }}"
+            content: "{{ initial_facts.ansible_facts | to_nice_yaml }}"
+            dest: "{{ inventory_dir }}/new_vms/{{ inventory_hostname }}.yaml"
         delegate_to: localhost
+
+- name: Stop debug
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - fail:
+        msg: "end of run"
+
 
 - name: Deploy and configure external loadbalancer instance
   hosts: loadbalancer

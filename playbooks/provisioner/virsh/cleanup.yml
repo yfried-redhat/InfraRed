@@ -30,7 +30,7 @@
 - name: DEBUG - dump XMLs to file
   copy:
         content: "{{ item.get_xml }}"
-        dest: "{{ inventory_dir }}/cleanupxmls/{{ item.item }}-cleanup.xml"
+        dest: "{{ inventory_dir }}/cleanupxmls/{{ item.item }}.xml"
   delegate_to: localhost
   with_items: "{{ xmls.results }}"
 
