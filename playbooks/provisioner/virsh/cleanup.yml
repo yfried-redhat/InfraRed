@@ -14,6 +14,26 @@
         list_vms: "{{ vm_names.list_vms | difference(ignore_virsh_nodes)}}"
         list_nets: "{{ vm_nets.list_nets | difference(ignore_virsh_nets) }}"
 
+- name: DEBUG - get XML before cleanup
+  virt:
+      name: "{{ item }}"
+      command: get_xml
+  register: xmls
+  with_items: "{{ virt_status.list_vms }}"
+
+- name: Ensures {{ inventory_dir }}/cleanupxmls dir exists
+  file:
+      path: "{{ inventory_dir }}/cleanupxmls"
+      state: directory
+  delegate_to: localhost
+
+- name: DEBUG - dump XMLs to file
+  copy:
+        content: "{{ item.get_xml }}"
+        dest: "{{ inventory_dir }}/cleanupxmls/{{ item.item }}-cleanup.xml"
+  delegate_to: localhost
+  with_items: "{{ xmls.results }}"
+
 - name: stop relevant vms
   virt:
       name: "{{ item }}"
